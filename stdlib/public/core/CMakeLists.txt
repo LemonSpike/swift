@@ -176,10 +176,12 @@ set(SWIFTLIB_SOURCES
   ### PLEASE KEEP THIS LIST IN ALPHABETICAL ORDER ###
   Availability.swift
   CollectionOfOne.swift
+  ElementaryFunctions.swift
   ExistentialCollection.swift.gyb
   Mirror.swift
   PlaygroundDisplay.swift
   CommandLine.swift
+  Real.swift
   SliceBuffer.swift
   Tuple.swift.gyb
   UnfoldSequence.swift

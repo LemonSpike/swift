@@ -1861,6 +1861,23 @@ internal struct _${Self}AnyHashableBox: _AnyHashableBox {
 }
 
 //===----------------------------------------------------------------------===//
+// ElementaryFunctions Conformance
+//===----------------------------------------------------------------------===//
+
+extension ${Self} : ElementaryFunctions {
+
+  @_transparent
+  public static func exp(_ x: ${Self}) -> ${Self} {
+    return ${Self}(Builtin.int_exp_FPIEEE${bits}(x._value))
+  }
+
+  @_transparent
+  public static func log(_ x: ${Self}) -> ${Self} {
+    return ${Self}(Builtin.int_log_FPIEEE${bits}(x._value))
+  }
+}
+
+//===----------------------------------------------------------------------===//
 // Deprecated operators
 //===----------------------------------------------------------------------===//
 
