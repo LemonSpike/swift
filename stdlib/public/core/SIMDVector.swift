@@ -1,15 +1,6 @@
-/*
 public protocol SIMDVector : MutableCollection,
-                             ExpressibleByArrayLiteral,
-                             CustomStringConvertible,
                              Equatable
                        where Index == Int {
-  
-  /// A vector with zero in all lanes.
-  init()
-  
-  /// A vector with value in all lanes.
-  init(repeating value: Element)
   
   /// A type representing the result of lanewise comparison.
   ///
@@ -28,36 +19,4 @@ public protocol SIMDVector : MutableCollection,
   static func ==(lhs: Self, rhs: Self) -> Predicate
   
   static func !=(lhs: Self, rhs: Self) -> Predicate
-  
-  func replacing(with other: Self, where predicate: Predicate) -> Self
 }
-
-public extension SIMDVector {
-  
-  @_transparent
-  var startIndex: Int { return 0 }
-  
-  @_transparent
-  func index(after i: Int) -> Int { return i + 1 }
-  
-  @_transparent
-  static func !=(lhs: Self, rhs: Self) -> Predicate { return !(lhs == rhs) }
-  
-  @_transparent
-  mutating func replace(with other: Self, where predicate: Predicate) {
-    self = self.replacing(with: other, where: predicate)
-  }
-  
-  @_transparent
-  var description: String {
-    get {
-      return "\(Self.self)(" + self.map({"\($0)"}).joined(separator: ", ") + ")"
-    }
-  }
-  
-  @_transparent
-  static func ==(lhs: Self, rhs: Self) -> Bool {
-    return all(lhs == rhs)
-  }
-}
-*/
