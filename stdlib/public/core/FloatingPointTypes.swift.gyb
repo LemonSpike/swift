@@ -1160,40 +1160,31 @@ extension ${Self}: BinaryFloatingPoint {
     _value = Builtin.int_fma_FPIEEE${bits}(lhs._value, rhs._value, _value)
   }
 
-  /// Returns a Boolean value indicating whether this instance is equal to the
-  /// given value.
+  /// Returns a Boolean value indicating whether two ${Self} values are equal.
   ///
-  /// This method serves as the basis for the equal-to operator (`==`) for
-  /// floating-point values. When comparing two values with this method, `-0`
-  /// is equal to `+0`. NaN is not equal to any value, including itself. For
-  /// example:
+  /// `-0` is equal to `+0`. NaN is not equal to any value, including itself.
+  /// For example:
   ///
   ///     let x = 15.0
-  ///     x.isEqual(to: 15.0)
+  ///     x == 15.0
   ///     // true
-  ///     x.isEqual(to: .nan)
+  ///     x == .nan
   ///     // false
-  ///     Double.nan.isEqual(to: .nan)
+  ///     Double.nan == .nan
   ///     // false
   ///
-  /// The `isEqual(to:)` method implements the equality predicate defined by
-  /// the [IEEE 754 specification][spec].
+  /// `==` implements the equality predicate defined by the [IEEE 754 specification][spec].
   ///
   /// [spec]: http://ieeexplore.ieee.org/servlet/opac?punumber=4610933
-  ///
-  /// - Parameter other: The value to compare with this value.
-  /// - Returns: `true` if `other` has the same value as this instance;
-  ///   otherwise, `false`.
   @_transparent
-  public func isEqual(to other: ${Self}) -> Bool {
-    return Bool(Builtin.fcmp_oeq_FPIEEE${bits}(self._value, other._value))
+  public static func ==(lhs: ${Self}, rhs: ${Self}) -> Bool {
+    return Bool(Builtin.fcmp_oeq_FPIEEE${bits}(lhs._value, rhs._value))
   }
 
   /// Returns a Boolean value indicating whether this instance is less than the
   /// given value.
   ///
-  /// This method serves as the basis for the less-than operator (`<`) for
-  /// floating-point values. Some special cases apply:
+  /// Some special cases apply:
   ///
   /// - Because NaN compares not less than nor greater than any value, this
   ///   method returns `false` when called on NaN or when NaN is passed as
@@ -1203,23 +1194,19 @@ extension ${Self}: BinaryFloatingPoint {
   ///   `+infinity`.
   ///
   ///     let x = 15.0
-  ///     x.isLess(than: 20.0)
+  ///     x < 20.0
   ///     // true
-  ///     x.isLess(than: .nan)
+  ///     x < .nan
   ///     // false
-  ///     Double.nan.isLess(than: x)
+  ///     .nan < x
   ///     // false
   ///
-  /// The `isLess(than:)` method implements the less-than predicate defined by
-  /// the [IEEE 754 specification][spec].
+  /// `<` implements the less-than predicate defined by the [IEEE 754 specification][spec].
   ///
   /// [spec]: http://ieeexplore.ieee.org/servlet/opac?punumber=4610933
-  ///
-  /// - Parameter other: The value to compare with this value.
-  /// - Returns: `true` if `other` is less than this value; otherwise, `false`.
   @_transparent
-  public func isLess(than other: ${Self}) -> Bool {
-    return Bool(Builtin.fcmp_olt_FPIEEE${bits}(self._value, other._value))
+  public static func <(lhs: ${Self}, rhs: ${Self}) -> Bool {
+    return Bool(Builtin.fcmp_olt_FPIEEE${bits}(lhs._value, rhs._value))
   }
 
   /// Returns a Boolean value indicating whether this instance is less than or
@@ -1249,8 +1236,8 @@ extension ${Self}: BinaryFloatingPoint {
   /// - Parameter other: The value to compare with this value.
   /// - Returns: `true` if `other` is less than this value; otherwise, `false`.
   @_transparent
-  public func isLessThanOrEqualTo(_ other: ${Self}) -> Bool {
-    return Bool(Builtin.fcmp_ole_FPIEEE${bits}(self._value, other._value))
+  public static func <=(lhs: ${Self}, rhs: ${Self}) -> Bool {
+    return Bool(Builtin.fcmp_ole_FPIEEE${bits}(lhs._value, rhs._value))
   }
 
   /// A Boolean value indicating whether this instance is normal.

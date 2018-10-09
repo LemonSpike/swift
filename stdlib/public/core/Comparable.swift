@@ -215,6 +215,6 @@ extension Comparable {
   ///   `false`.
   @inlinable
   public static func >= (lhs: Self, rhs: Self) -> Bool {
-    return !(lhs < rhs)
+    return rhs <= lhs
   }
 }

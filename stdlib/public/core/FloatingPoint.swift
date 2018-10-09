@@ -1000,18 +1000,7 @@ public protocol FloatingPoint : SignedNumeric, Strideable, Hashable
   /// Returns a Boolean value indicating whether this instance is equal to the
   /// given value.
   ///
-  /// This method serves as the basis for the equal-to operator (`==`) for
-  /// floating-point values. When comparing two values with this method, `-0`
-  /// is equal to `+0`. NaN is not equal to any value, including itself. For
-  /// example:
-  ///
-  ///     let x = 15.0
-  ///     x.isEqual(to: 15.0)
-  ///     // true
-  ///     x.isEqual(to: .nan)
-  ///     // false
-  ///     Double.nan.isEqual(to: .nan)
-  ///     // false
+  /// This method has been deprecated. Use the `==` operator instead.
   ///
   /// The `isEqual(to:)` method implements the equality predicate defined by
   /// the [IEEE 754 specification][spec].
@@ -1022,28 +1011,13 @@ public protocol FloatingPoint : SignedNumeric, Strideable, Hashable
   /// - Returns: `true` if `other` has the same value as this instance;
   ///   otherwise, `false`. If either this value or `other` is NaN, the result
   ///   of this method is `false`.
+  @available(swift, deprecated: 5, renamed: "==")
   func isEqual(to other: Self) -> Bool
 
   /// Returns a Boolean value indicating whether this instance is less than the
   /// given value.
   ///
-  /// This method serves as the basis for the less-than operator (`<`) for
-  /// floating-point values. Some special cases apply:
-  ///
-  /// - Because NaN compares not less than nor greater than any value, this
-  ///   method returns `false` when called on NaN or when NaN is passed as
-  ///   `other`.
-  /// - `-infinity` compares less than all values except for itself and NaN.
-  /// - Every value except for NaN and `+infinity` compares less than
-  ///   `+infinity`.
-  ///
-  ///     let x = 15.0
-  ///     x.isLess(than: 20.0)
-  ///     // true
-  ///     x.isLess(than: .nan)
-  ///     // false
-  ///     Double.nan.isLess(than: x)
-  ///     // false
+  /// This method has been deprecated. Use the `<` operator instead.
   ///
   /// The `isLess(than:)` method implements the less-than predicate defined by
   /// the [IEEE 754 specification][spec].
@@ -1054,26 +1028,13 @@ public protocol FloatingPoint : SignedNumeric, Strideable, Hashable
   /// - Returns: `true` if this value is less than `other`; otherwise, `false`.
   ///   If either this value or `other` is NaN, the result of this method is
   ///   `false`.
+  @available(swift, deprecated: 5, renamed: "<")
   func isLess(than other: Self) -> Bool
 
   /// Returns a Boolean value indicating whether this instance is less than or
   /// equal to the given value.
   ///
-  /// This method serves as the basis for the less-than-or-equal-to operator
-  /// (`<=`) for floating-point values. Some special cases apply:
-  ///
-  /// - Because NaN is incomparable with any value, this method returns `false`
-  ///   when called on NaN or when NaN is passed as `other`.
-  /// - `-infinity` compares less than or equal to all values except NaN.
-  /// - Every value except NaN compares less than or equal to `+infinity`.
-  ///
-  ///     let x = 15.0
-  ///     x.isLessThanOrEqualTo(20.0)
-  ///     // true
-  ///     x.isLessThanOrEqualTo(.nan)
-  ///     // false
-  ///     Double.nan.isLessThanOrEqualTo(x)
-  ///     // false
+  /// This method has been deprecated. Use the `<=` operator instead.
   ///
   /// The `isLessThanOrEqualTo(_:)` method implements the less-than-or-equal
   /// predicate defined by the [IEEE 754 specification][spec].
@@ -1084,6 +1045,7 @@ public protocol FloatingPoint : SignedNumeric, Strideable, Hashable
   /// - Returns: `true` if `other` is greater than this value; otherwise,
   ///   `false`. If either this value or `other` is NaN, the result of this
   ///   method is `false`.
+  @available(swift, deprecated: 5, renamed: "<=")
   func isLessThanOrEqualTo(_ other: Self) -> Bool
 
   /// Returns a Boolean value indicating whether this instance should precede
@@ -1407,28 +1369,18 @@ public enum FloatingPointRoundingRule {
 
 extension FloatingPoint {
   @_transparent
-  public static func == (lhs: Self, rhs: Self) -> Bool {
-    return lhs.isEqual(to: rhs)
+  public func isEqual(to other: Self) -> Bool {
+    return self == other
   }
-
+  
   @_transparent
-  public static func < (lhs: Self, rhs: Self) -> Bool {
-    return lhs.isLess(than: rhs)
+  public func isLess(than other: Self) -> Bool {
+    return self < other
   }
-
+  
   @_transparent
-  public static func <= (lhs: Self, rhs: Self) -> Bool {
-    return lhs.isLessThanOrEqualTo(rhs)
-  }
-
-  @_transparent
-  public static func > (lhs: Self, rhs: Self) -> Bool {
-    return rhs.isLess(than: lhs)
-  }
-
-  @_transparent
-  public static func >= (lhs: Self, rhs: Self) -> Bool {
-    return rhs.isLessThanOrEqualTo(lhs)
+  public func isLessThanOrEqualTo(_ other: Self) -> Bool {
+    return self <= other
   }
 }
 
@@ -1596,17 +1548,6 @@ public protocol BinaryFloatingPoint: FloatingPoint, ExpressibleByFloatLiteral {
   /// - If `x` is Float.pi, `x.significand` is `1.10010010000111111011011` in
   ///   binary, and `x.significandWidth` is 23.
   var significandWidth: Int { get }
-
-  /*  TODO: Implement these once it becomes possible to do so. (Requires
-   *  revised Integer protocol).
-  func isEqual<Other: BinaryFloatingPoint>(to other: Other) -> Bool
-
-  func isLess<Other: BinaryFloatingPoint>(than other: Other) -> Bool
-
-  func isLessThanOrEqualTo<Other: BinaryFloatingPoint>(other: Other) -> Bool
-
-  func isTotallyOrdered<Other: BinaryFloatingPoint>(belowOrEqualTo other: Other) -> Bool
-  */
 }
 
 extension FloatingPoint {
