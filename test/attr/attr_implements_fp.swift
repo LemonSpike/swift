@@ -13,20 +13,19 @@
 public var comparedAsComparablesCount : Int = 0
 public var comparedAsFauxtsCount : Int = 0
 
-public protocol FauxtingPoint : Comparable {
+public protocol OrderedNumeric : Comparable { }
+
+public protocol FauxtingPoint : OrderedNumeric {
   static var nan: Self { get }
   static var one: Self { get }
   static var two: Self { get }
-}
-
-public protocol BinaryFauxtingPoint: FauxtingPoint {
   var bitPattern: UInt8 { get }
 }
 
-public extension BinaryFauxtingPoint {
+public extension FauxtingPoint {
   // This version of < will be called in a context that only knows it has a Comparable.
   @_implements(Comparable, <(_:_:))
-  static func _ComparableLessThan(_ lhs: Fauxt, _ rhs: Fauxt) -> Bool {
+  static func _ComparableLessThan(_ lhs: Self, _ rhs: Self) -> Bool {
     print("compared as Comparables")
     comparedAsComparablesCount += 1
     return lhs.bitPattern < rhs.bitPattern
@@ -55,8 +54,8 @@ public struct Fauxt {
   }
 }
 
-extension Fauxt: BinaryFauxtingPoint {
-  // Requirement from BinaryFauxtingPoint
+extension Fauxt: FauxtingPoint {
+  // Requirement from FauxtingPoint
   public var bitPattern: UInt8 {
     switch state {
     case .One:
@@ -70,12 +69,9 @@ extension Fauxt: BinaryFauxtingPoint {
 }
 
 public extension Fauxt {
-  // This version of < will be called in a context that knows it has a Fauxt.
-  // It is inside an extension of Fauxt rather than the declaration of Fauxt
-  // itself in order to avoid a warning about near-matches with the defaulted
-  // requirement from Comparable.< up above.
+  // This version of < will be called in a context that knows it has FauxtingPoint.
   static func <(_ lhs: Fauxt, _ rhs: Fauxt) -> Bool {
-    print("compared as Fauxts")
+    print("compared as FauxtingPoint")
     comparedAsFauxtsCount += 1
     if lhs.state == .Nan || rhs.state == .Nan {
       return false
@@ -85,7 +81,11 @@ public extension Fauxt {
   }
 }
 
-public func compare_Comparables<T:Comparable>(_ x: T, _ y: T) -> Bool {
+public func compare_Comparables<T:OrderedNumeric>(_ x: T, _ y: T) -> Bool {
+  return x < y
+}
+
+public func compare_BFP<T:FauxtingPoint>(_ x: T, _ y: T) -> Bool {
   return x < y
 }
 
@@ -104,13 +104,23 @@ public func main() {
   assert(comparedAsComparablesCount == 3)
   // CHECK: compared as Comparables
 
-  assert(compare_Fauxts(Fauxt.one, Fauxt.two))
+  assert(compare_BFP(Fauxt.one, Fauxt.two))
   assert(comparedAsFauxtsCount == 1)
-  // CHECK: compared as Fauxts
-  assert(!compare_Fauxts(Fauxt.one, Fauxt.nan))
+  // CHECK: compared as FauxtingPoint
+  assert(!compare_BFP(Fauxt.one, Fauxt.nan))
   assert(comparedAsFauxtsCount == 2)
-  // CHECK: compared as Fauxts
-  assert(!compare_Fauxts(Fauxt.nan, Fauxt.one))
+  // CHECK: compared as FauxtingPoint
+  assert(!compare_BFP(Fauxt.nan, Fauxt.one))
   assert(comparedAsFauxtsCount == 3)
-  // CHECK: compared as Fauxts
+  // CHECK: compared as FauxtingPoint
+
+  assert(compare_Fauxts(Fauxt.one, Fauxt.two))
+  assert(comparedAsFauxtsCount == 4)
+  // CHECK: compared as FauxtingPoint
+  assert(!compare_Fauxts(Fauxt.one, Fauxt.nan))
+  assert(comparedAsFauxtsCount == 5)
+  // CHECK: compared as FauxtingPoint
+  assert(!compare_Fauxts(Fauxt.nan, Fauxt.one))
+  assert(comparedAsFauxtsCount == 6)
+  // CHECK: compared as FauxtingPoint
 }
