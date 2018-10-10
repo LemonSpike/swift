@@ -13,9 +13,7 @@
 public var comparedAsComparablesCount : Int = 0
 public var comparedAsFauxtsCount : Int = 0
 
-public protocol OrderedNumeric : Comparable { }
-
-public protocol FauxtingPoint : OrderedNumeric {
+public protocol FauxtingPoint : Comparable {
   static var nan: Self { get }
   static var one: Self { get }
   static var two: Self { get }
@@ -81,7 +79,7 @@ public extension Fauxt {
   }
 }
 
-public func compare_Comparables<T:OrderedNumeric>(_ x: T, _ y: T) -> Bool {
+public func compare_Comparables<T:Comparable>(_ x: T, _ y: T) -> Bool {
   return x < y
 }
 
