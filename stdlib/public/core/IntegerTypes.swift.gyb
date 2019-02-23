@@ -1093,10 +1093,11 @@ public struct ${Self}
   /// A type that represents an integer literal.
   public typealias IntegerLiteralType = ${Self}
 
-
   @_transparent
   public init(_builtinIntegerLiteral x: Builtin.IntLiteral) {
-    _value = Builtin.s_to_${u}_checked_trunc_IntLiteral_${BuiltinName}(x).0
+    let (value, fail) = Builtin.s_to_${u}_checked_trunc_IntLiteral_${BuiltinName}(x)
+    if Bool(fail) { Builtin.int_trap() }
+    _value = value
   }
 
   /// Creates a new instance with the same memory representation as the given
