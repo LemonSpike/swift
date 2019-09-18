@@ -14,7 +14,7 @@
 # Utility code for later in this template
 #
 
-from SwiftIntTypes import all_integer_types, int_max_bits, should_define_truncating_bit_pattern_init
+from SwiftIntTypes import all_integer_types, should_define_truncating_bit_pattern_init
 from SwiftFloatingPointTypes import getFtoIBounds
 
 from string import maketrans, capitalize
@@ -1549,7 +1549,7 @@ ${assignmentOperatorComment(x.operator, True)}
   ) -> (quotient: ${Self}, remainder: ${Self}) {
     // FIXME(integers): tests
 %   # 128-bit types are not provided by the 32-bit LLVM
-%   if word_bits == 32 and bits == 64:
+%   if bits > word_bits:
 %   # FIXME(integers): uncomment the above after using the right conditional
 %   # compilation block to exclude 64-bit Windows, which does not support
 %   # 128-bit operations
@@ -1635,9 +1635,14 @@ extension ${Self}: Hashable {
   ///   of this instance.
   @inlinable
   public func hash(into hasher: inout Hasher) {
+    % if bits > 64:
+    for word in words { hasher._combine(word) }
+    % else:
     hasher._combine(${U}${Self}(_value))
+    % end
   }
 
+  % if bits <= 64:
   @inlinable
   public func _rawHashValue(seed: Int) -> Int {
     % if bits == 64:
@@ -1651,6 +1656,7 @@ extension ${Self}: Hashable {
       count: ${bits / 8})
     % end
   }
+  % end
 }
 
 extension ${Self}: _HasCustomAnyHashableRepresentation {

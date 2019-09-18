@@ -9,11 +9,7 @@
 # See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 
 # Bit counts for all int types
-_all_integer_type_bitwidths = [8, 16, 32, 64]
-
-# Number of bits in the biggest int type
-int_max_bits = max(_all_integer_type_bitwidths)
-
+_all_integer_type_bitwidths = [8, 16, 32, 64, 128]
 
 def int_max(bits, signed):
     bits = bits - 1 if signed else bits

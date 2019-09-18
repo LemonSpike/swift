@@ -203,7 +203,7 @@ extension SIMD4 {
   }
 }
 
-%for self_type in all_integer_types(word_bits):
+%for self_type in [t for t in all_integer_types(word_bits) if t.bits <= 64]:
 % Self = self_type.stdlib_name
 % BuiltinName = self_type.builtin_name
 % Mask = Self if self_type.is_signed else self_type.get_opposite_signedness().stdlib_name
