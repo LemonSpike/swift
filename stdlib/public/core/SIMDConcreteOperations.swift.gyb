@@ -262,38 +262,318 @@ extension SIMD${n} where Scalar == ${Scalar} {
     ))
   }
     
+  /// Replaces elements of this vector with elements of `other` in the lanes
+  /// where `mask` is `true`.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in indices {
+  ///   if mask[i] { self[i] = other[i] }
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public mutating func replace(with other: Self, where mask: SIMDMask<MaskStorage>) {
+    self = replacing(with: other, where: mask)
+  }
+    
+  /// Returns a copy of this vector, with elements replaced by elements of
+  /// `other` in the lanes where `mask` is `true`.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in indices {
+  ///   result[i] = mask[i] ? other[i] : self[i]
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public func replacing(with other: Self, where mask: SIMDMask<MaskStorage>) -> Self {
+    // This could right-shift by bitWidth-1 to fill the mask, but then we need
+    // to conjure a vector of that value repeating, which is harder than
+    // compare and sext.
+    let zero: Builtin.${Builtin} = Builtin.zeroInitializer()
+    let mask = Builtin.cmp_slt_${Builtin}(mask._storage._storage._value, zero)
+    let bitmask = Self(${MaskExt}(mask))
+    return self & ~bitmask | other & bitmask
+  }
+      
+  /// Pointwise leading zero bit count.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in indices {
+  ///   result[i] = self[i].leadingZeroBitCount
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public var leadingZeroBitCount: Self {
+    Self(Builtin.int_ctlz_${Builtin}(self._storage._value, false._value))
+  }
+      
+  /// Pointwise trailing zero bit count.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in indices {
+  ///   result[i] = self[i].trailingZeroBitCount
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public var trailingZeroBitCount: Self {
+    Self(Builtin.int_cttz_${Builtin}(self._storage._value, false._value))
+  }
+        
+  /// Pointwise non-zero bit count.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in indices {
+  ///   result[i] = self[i].nonzeroBitCount
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public var nonzeroBitCount: Self {
+    Self(Builtin.int_ctpop_${Builtin}(self._storage._value))
+  }
+            
+  /// Bitwise negation.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = ~a[i]
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public static prefix func ~(a: Self) -> Self {
+    let allHot = Self(${MaskExt}(
+      Builtin.cmp_eq_${Builtin}(a._storage._value, a._storage._value)
+    ))
+    return allHot ^ a
+  }
+              
+  /// Bitwise and.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] & b[i]
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public static func &(a: Self, b: Self) -> Self {
+    Self(Builtin.and_${Builtin}(a._storage._value, b._storage._value))
+  }
+    
+  /// Bitwise exclusive or.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] ^ b[i]
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public static func ^(a: Self, b: Self) -> Self {
+    Self(Builtin.xor_${Builtin}(a._storage._value, b._storage._value))
+  }
+    
+  /// Bitwise or.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] | b[i]
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public static func |(a: Self, b: Self) -> Self {
+    Self(Builtin.or_${Builtin}(a._storage._value, b._storage._value))
+  }
+      
+  /// Pointwise masking left-shift.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &<< b[i]
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public static func &<<(a: Self, b: Self) -> Self {
+    let masked = b & Self(repeating: ${int.bits-1})
+    return Self(Builtin.shl_${Builtin}(a._storage._value, masked._storage._value))
+  }
+        
+  /// Pointwise masking right-shift.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &>> b[i]
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public static func &>>(a: Self, b: Self) -> Self {
+    let masked = b & Self(repeating: ${int.bits-1})
+%  if int.is_signed:
+    return Self(Builtin.ashr_${Builtin}(a._storage._value, masked._storage._value))
+%  else:
+    return Self(Builtin.lshr_${Builtin}(a._storage._value, masked._storage._value))
+%  end
+  }
+    
   /// The wrapping sum of two vectors.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &+ b[i]
+  /// }
+  /// ```
   @_alwaysEmitIntoClient
   public static func &+(a: Self, b: Self) -> Self {
     Self(Builtin.add_${Builtin}(a._storage._value, b._storage._value))
   }
     
   /// The wrapping difference of two vectors.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &- b[i]
+  /// }
+  /// ```
   @_alwaysEmitIntoClient
   public static func &-(a: Self, b: Self) -> Self {
     Self(Builtin.sub_${Builtin}(a._storage._value, b._storage._value))
   }
     
   /// The pointwise wrapping product of two vectors.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &* b[i]
+  /// }
+  /// ```
   @_alwaysEmitIntoClient
   public static func &*(a: Self, b: Self) -> Self {
     Self(Builtin.mul_${Builtin}(a._storage._value, b._storage._value))
   }
+    
+  /// Pointwise masking left-shift.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &<< b
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public static func &<<(a: Self, b: Scalar) -> Self {
+    a &<< Self(repeating: b)
+  }
         
-  /// Updates the left hand side with the wrapping sum of the two
-  /// vectors.
+  /// Pointwise masking right-shift.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &>> b
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public static func &>>(a: Self, b: Scalar) -> Self {
+    a &>> Self(repeating: b)
+  }
+            
+  /// Adds `b` to `a`, wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &+= b[i]
+  /// }
+  /// ```
   @_alwaysEmitIntoClient
   public static func &+=(a: inout Self, b: Self) { a = a &+ b }
     
-  /// Updates the left hand side with the wrapping difference of the two
-  /// vectors.
+  /// Subtracts `b` from `a`, wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &-= b[i]
+  /// }
+  /// ```
   @_alwaysEmitIntoClient
   public static func &-=(a: inout Self, b: Self) { a = a &- b }
     
-  /// Updates the left hand side with the pointwise wrapping product of two
-  /// vectors.
+  /// Multiplies each element of `a` by the corresponding element of `b`,
+  /// wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &*= b[i]
+  /// }
+  /// ```
   @_alwaysEmitIntoClient
   public static func &*=(a: inout Self, b: Self) { a = a &* b }
+  
+  /// Adds `b` to every element of `a`, wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &+= b
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public static func &+=(a: inout Self, b: Scalar) {
+    a &+= Self(repeating: b)
+  }
+      
+  /// Subtracts `b` from every element of `a`, wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &-= b
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public static func &-=(a: inout Self, b: Scalar) {
+    a &-= Self(repeating: b)
+  }
+  
+  /// Multiplies each element of `a` by `b`, wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &*= b
+  /// }
+  /// ```
+  @_alwaysEmitIntoClient
+  public static func &*=(a: inout Self, b: Scalar) {
+    a &*= Self(repeating: b)
+  }
 }
 
 % end

@@ -714,6 +714,15 @@ extension SIMDMask {
 //  Implementations of integer operations. These should eventually all
 //  be replaced with @_semantics to lower directly to vector IR nodes.
 extension SIMD where Scalar: FixedWidthInteger {
+  /// Pointwise leading zero bit count.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in indices {
+  ///   result[i] = self[i].leadingZeroBitCount
+  /// }
+  /// ```
   @_transparent
   public var leadingZeroBitCount: Self {
     var result = Self()
@@ -721,6 +730,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// Pointwise trailing zero bit count.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in indices {
+  ///   result[i] = self[i].trailingZeroBitCount
+  /// }
+  /// ```
   @_transparent
   public var trailingZeroBitCount: Self {
     var result = Self()
@@ -735,6 +753,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// Bitwise negation.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = ~a[i]
+  /// }
+  /// ```
   @_transparent
   public static prefix func ~(a: Self) -> Self {
     var result = Self()
@@ -742,6 +769,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// Bitwise and.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] & b[i]
+  /// }
+  /// ```
   @_transparent
   public static func &(a: Self, b: Self) -> Self {
     var result = Self()
@@ -749,6 +785,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// Bitwise exclusive or.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] ^ b[i]
+  /// }
+  /// ```
   @_transparent
   public static func ^(a: Self, b: Self) -> Self {
     var result = Self()
@@ -756,6 +801,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// Bitwise or.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] | b[i]
+  /// }
+  /// ```
   @_transparent
   public static func |(a: Self, b: Self) -> Self {
     var result = Self()
@@ -763,6 +817,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// Pointwise masking left-shift.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &<< b[i]
+  /// }
+  /// ```
   @_transparent
   public static func &<<(a: Self, b: Self) -> Self {
     var result = Self()
@@ -770,6 +833,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// Pointwise masking right-shift.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &>> b[i]
+  /// }
+  /// ```
   @_transparent
   public static func &>>(a: Self, b: Self) -> Self {
     var result = Self()
@@ -777,6 +849,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// The wrapping sum of two vectors.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &+ b[i]
+  /// }
+  /// ```
   @_transparent
   public static func &+(a: Self, b: Self) -> Self {
     var result = Self()
@@ -784,6 +865,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// The wrapping difference of two vectors.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &- b[i]
+  /// }
+  /// ```
   @_transparent
   public static func &-(a: Self, b: Self) -> Self {
     var result = Self()
@@ -791,6 +881,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// The pointwise wrapping product of two vectors.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &* b[i]
+  /// }
+  /// ```
   @_transparent
   public static func &*(a: Self, b: Self) -> Self {
     var result = Self()
@@ -798,6 +897,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// The pointwise quotient of two vectors.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] / b[i]
+  /// }
+  /// ```
   @_transparent
   public static func /(a: Self, b: Self) -> Self {
     var result = Self()
@@ -805,6 +913,15 @@ extension SIMD where Scalar: FixedWidthInteger {
     return result
   }
   
+  /// The pointwise remainder of two vectors.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] % b[i]
+  /// }
+  /// ```
   @_transparent
   public static func %(a: Self, b: Self) -> Self {
     var result = Self()
@@ -1032,11 +1149,29 @@ extension SIMD where Scalar: FixedWidthInteger {
     return a | Self(repeating: b)
   }
   
+  /// Pointwise masking left-shift.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &<< b
+  /// }
+  /// ```
   @_transparent
   public static func &<<(a: Self, b: Scalar) -> Self {
     return a &<< Self(repeating: b)
   }
   
+  /// Pointwise masking right-shift.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// var result = Self()
+  /// for i in result.indices {
+  ///   result[i] = a[i] &>> b
+  /// }
+  /// ```
   @_transparent
   public static func &>>(a: Self, b: Scalar) -> Self {
     return a &>> Self(repeating: b)
@@ -1092,16 +1227,41 @@ extension SIMD where Scalar: FixedWidthInteger {
     a = a &>> b
   }
   
+  /// Adds `b` to `a`, wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &+= b[i]
+  /// }
+  /// ```
   @_transparent
   public static func &+=(a: inout Self, b: Self) {
     a = a &+ b
   }
   
+  /// Subtracts `b` from `a`, wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &-= b[i]
+  /// }
+  /// ```
   @_transparent
   public static func &-=(a: inout Self, b: Self) {
     a = a &- b
   }
   
+  /// Multiplies each element of `a` by the corresponding element of `b`,
+  /// wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &*= b[i]
+  /// }
+  /// ```
   @_transparent
   public static func &*=(a: inout Self, b: Self) {
     a = a &* b
@@ -1142,26 +1302,66 @@ extension SIMD where Scalar: FixedWidthInteger {
     a = a &>> b
   }
   
+  /// Adds `b` to every element of `a`, wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &+= b
+  /// }
+  /// ```
   @_transparent
   public static func &+=(a: inout Self, b: Scalar) {
     a = a &+ b
   }
-  
+    
+  /// Subtracts `b` from every element of `a`, wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &-= b
+  /// }
+  /// ```
   @_transparent
   public static func &-=(a: inout Self, b: Scalar) {
     a = a &- b
   }
   
+  /// Multiplies each element of `a` by `b`, wrapping on overflow.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] &*= b
+  /// }
+  /// ```
   @_transparent
   public static func &*=(a: inout Self, b: Scalar) {
     a = a &* b
   }
   
+  /// Divides each element of `a` by `b`.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] /= b
+  /// }
+  /// ```
   @_transparent
   public static func /=(a: inout Self, b: Scalar) {
     a = a / b
   }
   
+  /// Replaces each element of `a` with its remainder from dividing by `b`.
+  ///
+  /// Equivalent to:
+  /// ```
+  /// for i in result.indices {
+  ///   a[i] %= b
+  /// }
+  /// ```
   @_transparent
   public static func %=(a: inout Self, b: Scalar) {
     a = a % b
